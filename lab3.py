@@ -79,8 +79,8 @@ print('V')
 print(V)
 i=1
 B = np.copy(testMatrix)
-iLower=B[0,0]
-iUpper=n-1
+#iLower=B[0,0]
+#iUpper=n-1
 
 #(X,Y,Z)=golub_kahan_svd_step(B, U, V, iLower, iUpper)
 
@@ -93,13 +93,47 @@ def golub_kahan_svd_step(B, U, V, iLower, iUpper):
     
     
     print(iUpper)
-    B22=B[iLower,iUpper]
+    B22=np.array([[0,4],
+                  [0,0],
+                  [0,0]])
     print('B22')
     print(B22)
     
+    iLower= B22.T.shape[0]
+    iUpper= B22.T.shape[1]
+    
     
     #2.
-    C=[B22]
+    cc=np.dot(B22.T,2)
+    print('cc')
+    print(cc)
+    
+    C=np.array([[0,0],
+                [8,0]])
+    print('C')
+    print(C)
+    
+    (x,y)=np.linalg.eig(C)
+    print('x')
+    print(x)
+    print('y')
+    print(y)
+    
+    nu=x
+    
+    k=iLower
+    alpha1= (B[k,k]**2)-nu
+    print('alp')
+    print(alpha1)
+    print(k)
+    print('bkk')
+    print(B[k,k])
+    beta1=np.dot(B[k+1,k], B[k,k])
+    print('b1')
+    print(beta1)
+    
+    
+    
     
     #3.
     #eigen values
