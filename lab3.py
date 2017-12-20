@@ -70,12 +70,10 @@ def golub_kahan_svd_step(B, U, V, iLower, iUpper):
 
     
     
-    
+    eps = 1.e-8
     B22=B[iLower:iUpper, iLower:iUpper]
-    print('B22')
-    print(B22)
     
-    tempMat = np.dot(B22.T,B[2,2])
+    tempMat = np.dot(B22.T,B22)
     m,n = tempMat.shape
     C = tempMat[n-2:n,n-2:n]
     
@@ -90,18 +88,19 @@ def golub_kahan_svd_step(B, U, V, iLower, iUpper):
     alpha = B[k,k]**2-mu
     beta = B[k,k]*B[k,k+1]
     
+    m,n = B.shape
     
     
-    
-    for k in range (iLower,iUpper):
+    for k in range (iLower,iUpper-1):
 
         R = givens_rot(alpha, beta, k, k+1, n)
-        
+        #print(R)
         B = np.dot(B,R.T)
+        print("newB")
         print(B)
         V = np.dot(V,R.T)
-        print('newV')
-        print(V)
+        #print('newV')
+        #print(V)
         alpha=B[k,k]
         beta=B[k+1,k]
         R = givens_rot(alpha, beta, k, k+1, m)
@@ -109,13 +108,14 @@ def golub_kahan_svd_step(B, U, V, iLower, iUpper):
         print('newB')
         print(B)
         U=np.dot(U,R.T)
-        print('newU')
-        print(U)
-        if ( k <= iUpper-1 ):
+        #print('newU')
+        #print(U)
+        #print(k)
+        if ( k < iUpper-2 ):
             alpha=B[k,k+1] 
             beta=B[k,k+2]
 
-    return(B, U, V, iLower, iUpper)
+    return B, U, V
 
 
 #%%
@@ -130,18 +130,14 @@ print(testMatrix.shape)
 m = testMatrix.shape[0]
 n = testMatrix.shape[1]
 
-U=np.eye(m,m)
-print('U')
-print(U)
-V=np.eye(n,n)
-print('V')
-print(V)
-i=1
-B = np.copy(testMatrix)
-iLower=1
+
+
+
+U = np.eye(m)
+V = np.eye(n)
+B=testMatrix
+iLower=0
 iUpper=4
 
-(X,Y,Z)=golub_kahan_svd_step(B, U, V, iLower, iUpper)    
+X,Y,Z=golub_kahan_svd_step(B, U, V, iLower, iUpper)    
 
-
-    
