@@ -14,6 +14,9 @@ def test_golub_reinsch_svd(fun, A, eps = 1e-8):
 
     B, U, V, counter = fun(A)
     # check if A = U*B*V^T
+    Um,Un = U.shape
+    a = np.zeros((Um,Un),float)
+    B = np.fill_diagonal(a,B)
     NewA = np.dot(U,B)
     NewA = np.dot(NewA,V.T)
     

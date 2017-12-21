@@ -119,15 +119,15 @@ def golub_kahan_svd_step(B, U, V, iLower, iUpper):
     for k in range (iLower,iUpper-1):
         R = givens_rot(alpha, beta, k, k+1, n)
         B = np.dot(B,R.T)
-        print("newB")
-        print(B)
+        #print("newB")
+        #print(B)
         V = np.dot(V,R.T)
         alpha=B[k,k]
         beta=B[k+1,k]
         R = givens_rot(alpha, beta, k, k+1, m)
         B=np.dot(R,B)
-        print('newB')
-        print(B)
+        #print('newB')
+        #print(B)
         U=np.dot(U,R.T)
         if ( k < iUpper-2 ):
             alpha=B[k,k+1] 
@@ -155,26 +155,102 @@ def golub_reinsch_svd(A, MAX_ITR = 50, eps = 1.e-8):
         p=0
         while counter < MAX_ITR:
             
-            print(counter)
+            #print(counter)
             for i in range (0,n-1):
                 if (np.abs(B[i,i+1]))<=(eps*np.abs(B[i,i]+B[i+1,i+1])):
                     B[i,i+1] = 0                    
             B33=B[n-2-q:n-q, n-2-q:n-q]
-            print("B33")
-            print(B33)
             #gets the values of the opposite diagonal, if they add to less than eps that block is reduced
             if np.sum(np.diag(np.fliplr(B33))) < eps:
-                print("q")
-                print(q)
                 q+=1 #increment q so that the block being worked on is smaller
             if q == n-1:
                 S = np.diag(B)
-                print(np.dot(np.dot(U, B),V.T))
-                print(np.dot(U,U.T))
-                print(np.dot(V,V.T))
+                #print(B)
                 return S, U, V, counter
             B,U,V = golub_kahan_svd_step(B,U,V,p,n-q)
                 
             counter +=1       
+#%%
+def mySVD(A):
+    m,n = A.shape
+    print("The matrix A has dimentions of: " + str(m)+ " by " + str(n))
+    
+    if m>=n:
+        S,U,V,count = golub_reinsch_svd(A)
+    else:
+        S,V,U,count = golub_reinsch_svd(A.T)   
+    return S,U,V
+    
+#%%
+def test_golub_reinsch_svd(fun, A, eps = 1e-8):
 
+    #Arguments:
+        #fun -- The function handle.
+        #A -- A numpy array of size m x n. Data matrix.
+        #eps -- A small value used as a threshold to check
+        #if a value is zero or not.
+    #Returns:
+        #True -- If the code is correct.
+        #False -- If the code is not correct.
+
+    S, U, V, counter = fun(A)
+    # check if A = U*B*V^T
+    #print(S)
+    Um = U.shape[0]
+    Vn = V.shape[1]
+    a = np.zeros((Um,Vn),int)
+    np.fill_diagonal(a,S)
+    B = a
+    NewA = np.dot(U,B)
+    NewA = np.dot(NewA,V.T)
+    
+    if np.sum(np.abs(A-NewA))<eps:
+        print("product test failed!")
+        return False
+
+    # check if U*U^T = I
+    if np.sum(np.abs(np.eye(A.shape[0])-np.dot(U,U.T)))> eps:
+        print("U.U.T identity test Failed!")
+        return False
+    
+    # check if V*V^T = I
+    if np.sum(np.abs(np.eye(A.shape[1])-np.dot(V,V.T)))> eps:
+        print("V.V.T identity test Failed!")
+        return False    
+    
+    # check if B is diagonal with positive elements
+    
+    B_copy = np.array(B, copy = True)#create a copy of the B Matrix
+    np.fill_diagonal(B_copy,0)
+    for i in np.nditer(B_copy): #iterate over the array    
+        #print(i)        
+        if np.absolute(i) > eps:#the value i is an element in the array
+            print("Diagonal test failed")
+            return False     #if i is greater than eps
+            break               #the matrix is not diagonal, exit loop
+    #if the test makes it this far the matrix is diagonal
+    for i in np.nditer(np.diagonal(B)):
+        if i < 0:
+            print("element is not positive")
+            return False
+    #all tests passed
+    
+    return True
+#%%
+    #compare MySVD to numpy SVD
+    
+    #Execution time
+def comparison(A):
+    
+    import timeit
+    start_time = timeit.default_timer()
+    S,U,V = mySVD(A)
+    elapsed1 = timeit.default_timer() - start_time
+
+    start_time = timeit.default_timer()
+    SP,UP,VP = np.linalg.svd(A)  #"P" stands for python
+    elapsed2 = timeit.default_timer() - start_time
+    return elapsed1,elapsed2
+    
+    
         
