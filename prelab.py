@@ -64,54 +64,22 @@ def bidiag_reduction(A):
     return B, U, V
 
 #%%
-A = np.random.randn(10,5)*10.0
+    
+#Part 1   
+A = np.random.randn(10,5)*10.0  #Create a Random Matrix of given dimension
+B,U,V = bidiag_reduction(A)     #Perform Bidiagonal Reduction 
 
-#print(A)
+U1,S1,V1 = np.linalg.svd(A)     #Singular Values of A
+U2,S2,V2 = np.linalg.svd(B)     #Singular values of B
 
+Utest = U1-U2                   # Comparing the U values
+Stest = S1-S2                   #Comparing the Sigma Values
+Vtest = (V1.T-V2.T)             #Compring the V values
 
-B,U,V = bidiag_reduction(A)
-print("B")
-print(B)
-print("U")
-print(U)
-print("V")
-print(V)
-
-
-U1,S1,V1 = np.linalg.svd(A)
+#Part2
+NewU = np.dot(U,U2)             #Obtaining the new unitary Matrix U
+NewV = np.dot(V,V2)             #Obtaining the new unitary Matrix V
+NewSigma= S2                    #Sigma values remain the same
 
 
 
-U2,S2,V2 = np.linalg.svd(B)
-print("U1")
-print(U1)
-print("U2")
-print(U2)
-
-print("S1")
-print(S1)
-print("S2")
-print(S2)
-
-print("V1.T")
-print(V1.T)
-print("V2.T")
-print(V2.T)
-
-print("Comparisons:U, Sigma, V")
-print(np.abs(U1-U2))
-print(" ")
-print(np.abs(S1-S2))
-print(" ")
-print(np.abs(V1.T-V2.T))
-
-Utest = U1-U2
-Stest = S1-S2
-Vtest = (V1.T-V2.T)
-
-NewA = np.dot(U,B)
-NewA = np.dot(NewA,V.T)
-
-print(A)
-print(NewA)
-print(A-NewA)
