@@ -96,7 +96,8 @@ def golub_kahan_svd_step(B, U, V, iLower, iUpper):
         if ( k < iUpper-2 ):
             alpha=B[k,k+1] 
             beta=B[k,k+2]
-
+    print("This should be A")
+    print(np.dot(np.dot(U,B),V.T))
     return B, U, V
 
 
@@ -118,8 +119,9 @@ n = testMatrix.shape[1]
 U = np.eye(m)
 V = np.eye(n)
 B=testMatrix
-iLower=0
+iLower=2
 iUpper=4
+
 
 X,Y,Z=golub_kahan_svd_step(B, U, V, iLower, iUpper)    
 

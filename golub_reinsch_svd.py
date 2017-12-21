@@ -63,6 +63,77 @@ def bidiag_reduction(A):
             V = np.dot(V, P)
     
     return B, U, V
+#%%
+def givens_rot(alpha, beta, i, j, m):
+
+    #Arguments:
+        #alpha-- The i-th component of a vector b.
+        #beta -- The j-th component of a vector b.
+        #i -- The index i.
+        #j -- The index j.
+        #m -- The length of vector b.
+    #Returns:
+        #R -- A numpy array of size mxm. Givens Rotation Matrix.    
+    R = np.eye(m)
+    theta = np.arctan(beta/alpha)
+    c = np.cos(-theta)
+    s = np.sin(-theta)
+    R[i,i] = 1*c
+    R[i,j] = -1*s
+    R[j,j] = 1*c
+    R[j,i] = 1*s
+    return R
+#%%
+def golub_kahan_svd_step(B, U, V, iLower, iUpper):
+#    Arguments:
+#        B -- A numpy array of size m x n. Upper diagonal matrix.
+#        U -- A numpy array of size m x m. Unitary matrix.
+#        V -- A numpy array of size n x n. Unitary matrix.
+#        iLower, iUpper -- Identify the submatrix B22.
+#    Returns:
+#        B -- A numpy array of size mxn. Upper diagonal matrix with smaller values
+#        on the upper diagonal elements.
+#        U -- A numpy array of size m x m. Unitary matrix.
+#        V -- A numpy array of size m x m. Unitary matrix.
+
+    
+    B22=B[iLower:iUpper, iLower:iUpper]
+    
+    tempMat = np.dot(B22.T,B22)
+    m,n = tempMat.shape
+    C = tempMat[n-2:n,n-2:n]
+    
+    eigs,_ = np.linalg.eig(C)
+    
+    if np.abs(eigs[0]-C[1,1])<np.abs(eigs[1]-C[1,1]):
+        mu = eigs[0]
+    else:
+        mu = eigs[1]
+    
+    k = iLower
+    alpha = B[k,k]**2-mu
+    beta = B[k,k]*B[k,k+1]
+    
+    m,n = B.shape    
+    
+    for k in range (iLower,iUpper-1):
+        R = givens_rot(alpha, beta, k, k+1, n)
+        B = np.dot(B,R.T)
+        print("newB")
+        print(B)
+        V = np.dot(V,R.T)
+        alpha=B[k,k]
+        beta=B[k+1,k]
+        R = givens_rot(alpha, beta, k, k+1, m)
+        B=np.dot(R,B)
+        print('newB')
+        print(B)
+        U=np.dot(U,R.T)
+        if ( k < iUpper-2 ):
+            alpha=B[k,k+1] 
+            beta=B[k,k+2]
+
+    return B, U, V
 
 #%%
 def golub_reinsch_svd(A, MAX_ITR = 50, eps = 1.e-8):
@@ -80,6 +151,30 @@ def golub_reinsch_svd(A, MAX_ITR = 50, eps = 1.e-8):
         B, U, V = bidiag_reduction(A)
         m,n = B.shape
         counter = 0
+        q=0
+        p=0
         while counter < MAX_ITR:
-            if 
+            
+            print(counter)
+            for i in range (0,n-1):
+                if (np.abs(B[i,i+1]))<=(eps*np.abs(B[i,i]+B[i+1,i+1])):
+                    B[i,i+1] = 0                    
+            B33=B[n-2-q:n-q, n-2-q:n-q]
+            print("B33")
+            print(B33)
+            #gets the values of the opposite diagonal, if they add to less than eps that block is reduced
+            if np.sum(np.diag(np.fliplr(B33))) < eps:
+                print("q")
+                print(q)
+                q+=1 #increment q so that the block being worked on is smaller
+            if q == n-1:
+                S = np.diag(B)
+                print(np.dot(np.dot(U, B),V.T))
+                print(np.dot(U,U.T))
+                print(np.dot(V,V.T))
+                return S, U, V, counter
+            B,U,V = golub_kahan_svd_step(B,U,V,p,n-q)
+                
+            counter +=1       
+        
         
