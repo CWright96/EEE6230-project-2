@@ -26,13 +26,7 @@ def givens_rot(alpha, beta, i, j, m):
     R[i,j] = -1*s
     R[j,j] = 1*c
     R[j,i] = 1*s
-    return R    
-
-
-
-
-
-
+    return R
 #%%
 b=np.array([[1.0],[2.0],[3.0],[4.0],[5.0]])
 print(b)
@@ -67,10 +61,6 @@ def golub_kahan_svd_step(B, U, V, iLower, iUpper):
 #        on the upper diagonal elements.
 #        U -- A numpy array of size m x m. Unitary matrix.
 #        V -- A numpy array of size m x m. Unitary matrix.
-
-    
-    
-    eps = 1.e-8
     B22=B[iLower:iUpper, iLower:iUpper]
     
     tempMat = np.dot(B22.T,B22)
@@ -88,19 +78,14 @@ def golub_kahan_svd_step(B, U, V, iLower, iUpper):
     alpha = B[k,k]**2-mu
     beta = B[k,k]*B[k,k+1]
     
-    m,n = B.shape
-    
+    m,n = B.shape    
     
     for k in range (iLower,iUpper-1):
-
         R = givens_rot(alpha, beta, k, k+1, n)
-        #print(R)
         B = np.dot(B,R.T)
         print("newB")
         print(B)
         V = np.dot(V,R.T)
-        #print('newV')
-        #print(V)
         alpha=B[k,k]
         beta=B[k+1,k]
         R = givens_rot(alpha, beta, k, k+1, m)
@@ -108,9 +93,6 @@ def golub_kahan_svd_step(B, U, V, iLower, iUpper):
         print('newB')
         print(B)
         U=np.dot(U,R.T)
-        #print('newU')
-        #print(U)
-        #print(k)
         if ( k < iUpper-2 ):
             alpha=B[k,k+1] 
             beta=B[k,k+2]
