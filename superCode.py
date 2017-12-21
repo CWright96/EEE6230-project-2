@@ -20,6 +20,7 @@ def householder_transformation(b, k):
     # uncomment this line if you index the first matrix element as 1
     # k = k - 1
     
+    
     m = b.shape[0]
     w = b.copy()
     w[0:k,0] = 0
