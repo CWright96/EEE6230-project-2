@@ -148,32 +148,27 @@ def golub_reinsch_svd(A, MAX_ITR = 50, eps = 1.e-8):
 #        U -- Unitary matrix of size m x m.
 #        V -- Unitary matrix of size n x n.
 #        counter -- Number of iterations before convergence.
-        B, U, V = bidiag_reduction(A)
-        m,n = B.shape
+       
+        B, U, V = bidiag_reduction(A) #Bidiagonal Reduction of A
+        m,n = B.shape                 #Determine the shape of B
         counter = 0
         q=0
         p=0
-        while counter < MAX_ITR:
+        while counter < MAX_ITR:      #Runing the counter in a while loop
             
-            print(counter)
-            for i in range (0,n-1):
-                if (np.abs(B[i,i+1]))<=(eps*np.abs(B[i,i]+B[i+1,i+1])):
+            
+            for i in range (0,n-1):   #Range of i
+                if (np.abs(B[i,i+1]))<=(eps*np.abs(B[i,i]+B[i+1,i+1])):  #Zeroing down values less than eps
                     B[i,i+1] = 0                    
-            B33=B[n-2-q:n-q, n-2-q:n-q]
-            print("B33")
-            print(B33)
-            #gets the values of the opposite diagonal, if they add to less than eps that block is reduced
+            B33=B[n-2-q:n-q, n-2-q:n-q]     #obtaining B33
+            
+            #Fliplr-Gets the values of the opposite diagonal, if they add to less than eps that block is reduced
             if np.sum(np.diag(np.fliplr(B33))) < eps:
-                print("q")
-                print(q)
-                q+=1 #increment q so that the block being worked on is smaller
+                q+=1                  #increment q so that the block being worked on is smaller
             if q == n-1:
-                S = np.diag(B)
-                print(np.dot(np.dot(U, B),V.T))
-                print(np.dot(U,U.T))
-                print(np.dot(V,V.T))
-                return S, U, V, counter
-            B,U,V = golub_kahan_svd_step(B,U,V,p,n-q)
+                S = np.diag(B)        #Obtaing S
+                return S, U, V, counter     #returning the value of S, U, V and teh counter value
+            B,U,V = golub_kahan_svd_step(B,U,V,p,n-q) 
                 
             counter +=1       
         
